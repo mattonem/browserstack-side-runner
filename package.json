@@ -1,0 +1,20 @@
+{
+  "name": "@maxmattone/browserstack-side-runner",
+  "version": "1.0.3",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "browserstack-side-runner": "index.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@maxmattone/code-export-browserstack-mocha": "file:../code-export-browserstack-mocha",
+    "cli-logger": "^0.5.40",
+    "js-yaml": "^4.1.0",
+    "winston": "^3.3.3"
+  }
+}
