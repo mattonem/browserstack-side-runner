@@ -2,5 +2,5 @@
 
 ```sh
 npm install @maxmattone/browserstack-side-runne
-npx @maxmattone/browserstack-side-runner --filename single-test.side -w 2
+npx @maxmattone/browserstack-side-runner --f single-test.side -w 2
 ```
