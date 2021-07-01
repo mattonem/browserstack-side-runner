@@ -1,6 +1,6 @@
 {
   "name": "@maxmattone/browserstack-side-runner",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "main": "index.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,7 +14,9 @@
   "dependencies": {
     "@maxmattone/code-export-browserstack-mocha": "^1.0.0",
     "cli-logger": "^0.5.40",
+    "commander": "^8.0.0",
     "js-yaml": "^4.1.0",
-    "mocha": "^9.0.1"
+    "mocha": "^9.0.1",
+    "selenium-webdriver": "^4.0.0-beta.4"
   }
 }

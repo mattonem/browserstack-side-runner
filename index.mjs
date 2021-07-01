@@ -17,10 +17,13 @@ commander
 	.option('-w, --max-workers <number>', 'Maximum amount of workers that will run your tests, defaults to 1')
 	.option('--config, --config-file <filepath>', 'Use specified YAML file for configuration. (default: .side.yml)')
 
+
 commander.parse(process.argv);
-commander.maxWorkers = commander.maxWorkers ? commander.maxWorkers : 1
-commander.configFile = commander.configFile ? commander.configFile : '.side.yml'
-var conf = {level: commander.debug ? logger.DEBUG :logger.INFO};
+const options = commander.opts();
+
+options.maxWorkers = options.maxWorkers ? options.maxWorkers : 1
+options.configFile = options.configFile ? options.configFile : '.side.yml'
+var conf = {level: options.debug ? logger.DEBUG :logger.INFO};
 var log = logger(conf);
 function readFile(filename) {
   return JSON.parse(
@@ -42,12 +45,12 @@ function normalizeProject(project) {
 }
 var config
 try {
-  config = yaml.load(fs.readFileSync(commander.configFile));
+  config = yaml.load(fs.readFileSync(options.configFile));
 } catch (e) {
   log.error(e);
 }
 
-const project = readFile(commander.filename)
+const project = readFile(options.filename)
 var results = [];
 log.debug(project);
 for (let index = 0; index < project.tests.length; index++)
@@ -70,7 +73,7 @@ results.forEach(file =>
     		return log.error(err);
   		}})
 	);
-var command = `npx mocha --parallel -j ${commander.maxWorkers} `
+var command = `npx mocha --parallel -j ${options.maxWorkers} `
 for (let index = 0; index < results.length; index++)
 {
 	command += results[index].filename + ' '
