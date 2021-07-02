@@ -1,5 +1,7 @@
 # browserstack-side-runner
 
+This project is variant of the [selenium-side-runner](https://github.com/SeleniumHQ/selenium-ide/tree/v3/packages/selenium-side-runner) for running tests against the browserstack grid. 
+
 ```sh
 npm install @maxmattone/browserstack-side-runner
 npx @maxmattone/browserstack-side-runner -f single-test.side -w 2
