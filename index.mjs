@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from 'fs'
+import rimraf from "rimraf";
 import path from 'path'
 import { emitTest, emitSuite } from '@maxmattone/code-export-browserstack-mocha'
 import pkg from '@seleniumhq/side-utils';
@@ -8,13 +9,14 @@ import commander from 'commander';
 import logger from 'cli-logger';
 import yaml  from 'js-yaml';
 import Mocha from 'mocha';
+import glob from 'glob';
 
 const { project: projectProcessor } = pkg;
 import { exec } from "child_process";
 
 commander
 	.option('-d, --debug', 'output extra debugging')
-	.option('-f, --filename <filename>', 'path the test.side file')
+	.option('-f, --filter <string>', 'Run suites matching name')
 	.option('-w, --max-workers <number>', 'Maximum amount of workers that will run your tests, defaults to 1')
 	.option('--config, --config-file <filepath>', 'Use specified YAML file for configuration. (default: .side.yml)')
 
@@ -24,66 +26,54 @@ const options = commander.opts();
 
 options.maxWorkers = options.maxWorkers ? options.maxWorkers : 1
 options.configFile = options.configFile ? options.configFile : '.side.yml'
+options.filter = options.filter ? options.filter : '*.side'
+options.buildFolderPath = '_generated'
+
 var conf = {level: options.debug ? logger.DEBUG :logger.INFO};
 var log = logger(conf);
-function readFile(filename) {
-  return JSON.parse(
-    fs.readFileSync(
-      path.join(
-        filename
-      )
-    )
-  )
-}
 
-
-function normalizeProject(project) {
-  let _project = { ...project }
-  _project.suites.forEach(suite => {
-    projectProcessor.normalizeTestsInSuite({ suite, tests: _project.tests })
-  })
-  return _project
-}
-var config
-try {
-  config = yaml.load(fs.readFileSync(options.configFile));
-} catch (e) {
-  log.error(e);
-}
-
-const project = readFile(options.filename)
-var results = [];
-log.debug(project);
-for (let index = 0; index < project.tests.length; index++)
-{
-  config.capabilities['name'] = project.tests[index].name
-  results.push( await emitTest({
-     baseUrl: project.url,
-     test: project.tests[index],
-     tests: project.tests,
-     beforeEachOptions: {
-        capabilities: config.capabilities,
-        gridUrl: config.server,
-      },
-}))
-}
-log.debug(results);
 var mocha = new Mocha(
 {
     parallel: true,
     jobs: options.maxWorkers
 });
 
+rimraf.sync(options.buildFolderPath)
+fs.mkdirSync(options.buildFolderPath);
 
-results.forEach(file => {
-	fs.writeFileSync(file.filename, file.body, function (err,data) {
-		if (err) {
-  		return log.error(err);
-		}
+var config
+try {
+  config = yaml.load(fs.readFileSync(options.configFile));
+} catch (e) {
+  log.error(e);
+}
+const projects = glob.sync(options.filter).map(name => JSON.parse(fs.readFileSync(name)))
+var testFileInc = 1;
+var promises = [];
+projects.forEach(project => {
+  project.tests.forEach(test => {
+    promises.push(new Promise(async (resolve, reject) => {
+    config.capabilities['name'] = test.name
+    const result = await emitTest({
+      baseUrl: project.url,
+      test: test,
+      tests: project.tests,
+      beforeEachOptions: {
+        capabilities: config.capabilities,
+        gridUrl: config.server,
+      },});
+    console.log(result);
+    var filename = path.join(options.buildFolderPath, testFileInc + result.filename);
+    testFileInc ++;
+    fs.writeFileSync(filename, result.body);
+    mocha.addFile(filename);
+    resolve()}))
   })
-  mocha.addFile(file.filename)
+});
+Promise.all(promises).then(()=>{
+  mocha.run(function(failures) {
+    process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
+    if(!options.debug) rimraf.sync(options.buildFolderPath)
   });
 
-mocha.run(function(failures) {
-  process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
-});
+})
