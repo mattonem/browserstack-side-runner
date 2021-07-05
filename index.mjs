@@ -62,7 +62,6 @@ projects.forEach(project => {
         capabilities: config.capabilities,
         gridUrl: config.server,
       },});
-    console.log(result);
     var filename = path.join(options.buildFolderPath, testFileInc + result.filename);
     testFileInc ++;
     fs.writeFileSync(filename, result.body);
