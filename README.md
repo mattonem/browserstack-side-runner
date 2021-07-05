@@ -15,7 +15,7 @@ Don't forget to use the config file `.side.yml` like so:
      os: "Windows"
      os_version: '10'
      resolution: '1024x768'
-     name: 'Selenium IDE automate test'
+     build: 'Selenium IDE automate test'
      browserstack.debug: true
      browserstack.console: "verbose"
      browserstack.networkLogs: true
