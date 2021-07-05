@@ -7,6 +7,7 @@ import pkg from '@seleniumhq/side-utils';
 import commander from 'commander';
 import logger from 'cli-logger';
 import yaml  from 'js-yaml';
+import Mocha from 'mocha';
 
 const { project: projectProcessor } = pkg;
 import { exec } from "child_process";
@@ -67,27 +68,22 @@ for (let index = 0; index < project.tests.length; index++)
 }))
 }
 log.debug(results);
-results.forEach(file => 
-	fs.writeFile(file.filename, file.body, function (err,data) {
-  		if (err) {
-    		return log.error(err);
-  		}})
-	);
-var command = `npx mocha --parallel -j ${options.maxWorkers} `
-for (let index = 0; index < results.length; index++)
+var mocha = new Mocha(
 {
-	command += results[index].filename + ' '
-}
-log.debug(command);
+    parallel: true,
+    jobs: options.maxWorkers
+});
 
-exec(command, (error, stdout, stderr) => {
-    if (error) {
-        log.error(`error: ${error.message}`);
-        return;
-    }
-    if (stderr) {
-        log.error(`stderr: ${stderr}`);
-        return;
-    }
-    console.log(`stdout: ${stdout}`);
+
+results.forEach(file => {
+	fs.writeFileSync(file.filename, file.body, function (err,data) {
+		if (err) {
+  		return log.error(err);
+		}
+  })
+  mocha.addFile(file.filename)
+  });
+
+mocha.run(function(failures) {
+  process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
 });
