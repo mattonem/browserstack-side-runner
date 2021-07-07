@@ -15,10 +15,11 @@ const { project: projectProcessor } = pkg;
 import { exec } from "child_process";
 
 commander
-	.option('-d, --debug', 'output extra debugging')
-	.option('-f, --filter <string>', 'Run suites matching name')
-	.option('-w, --max-workers <number>', 'Maximum amount of workers that will run your tests, defaults to 1')
-	.option('--config, --config-file <filepath>', 'Use specified YAML file for configuration. (default: .side.yml)')
+  .option('-d, --debug', 'output extra debugging')
+  .option('-f, --filter <string>', 'Run suites matching name')
+  .option('-w, --max-workers <number>', 'Maximum amount of workers that will run your tests, defaults to 1')
+  .option('--base-url [url]', 'Override the base URL that was set in the IDE')
+  .option('--config, --config-file <filepath>', 'Use specified YAML file for configuration. (default: .side.yml)')
 
 
 commander.parse(process.argv);
@@ -55,7 +56,7 @@ projects.forEach(project => {
     promises.push(new Promise(async (resolve, reject) => {
     config.capabilities['name'] = test.name
     const result = await emitTest({
-      baseUrl: project.url,
+      baseUrl: options.baseUrl ? options.baseUrl : project.baseUrl,
       test: test,
       tests: project.tests,
       beforeEachOptions: {
