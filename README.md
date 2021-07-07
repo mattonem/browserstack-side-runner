@@ -4,7 +4,7 @@ This project is variant of the [selenium-side-runner](https://github.com/Seleniu
 
 ```sh
 npm install @maxmattone/browserstack-side-runner
-npx @maxmattone/browserstack-side-runner -f single-test.side -w 2
+npx @maxmattone/browserstack-side-runner -w 2 test.side
 ```
 Don't forget to use the config file `.side.yml` like so:
 ```yml
@@ -21,3 +21,4 @@ Don't forget to use the config file `.side.yml` like so:
      browserstack.networkLogs: true
  server: "https://<bs_username>:<bs_accesskey>@hub-cloud.browserstack.com/wd/hub"
 ```
+
