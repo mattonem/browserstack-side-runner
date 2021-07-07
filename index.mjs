@@ -54,10 +54,10 @@ var mocha = new Mocha(
     reporterOptions: {
           "reporterEnabled": "spec" + (options.outputDirectory ? ', ' + options.outputFormat :''),
           "mochajsJsonFileReporterReporterOptions": {
-            "output": path.join(options.outputDirectory, "test-output.json")
+            "output": path.join(options.outputDirectory || '', "test-output.json")
           },
           "xunitReporterOptions": {
-            "output": path.join(options.outputDirectory, "test-output.xunit.xml")
+            "output": path.join(options.outputDirectory || '', "test-output.xunit.xml")
           },
       }
 });
