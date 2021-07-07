@@ -81,7 +81,7 @@ projects.forEach(project => {
     promises.push(new Promise(async (resolve, reject) => {
     config.capabilities['name'] = test.name
     const result = await emitTest({
-      baseUrl: options.baseUrl ? options.baseUrl : project.baseUrl,
+      baseUrl: options.baseUrl ? options.baseUrl : project.url,
       test: test,
       tests: project.tests,
       beforeEachOptions: {
