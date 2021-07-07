@@ -15,29 +15,53 @@ const { project: projectProcessor } = pkg;
 import { exec } from "child_process";
 
 commander
+  .usage('[options] project.side [project.side] [*.side]')
   .option('-d, --debug', 'output extra debugging')
-  .option('-f, --filter <string>', 'Run suites matching name')
+  .option('-f, --filter <grep regex>', 'Run tests matching name')
   .option('-w, --max-workers <number>', 'Maximum amount of workers that will run your tests, defaults to 1')
-  .option('--base-url [url]', 'Override the base URL that was set in the IDE')
+  .option('--base-url <url>', 'Override the base URL that was set in the IDE')
   .option('--config, --config-file <filepath>', 'Use specified YAML file for configuration. (default: .side.yml)')
-
+  .option('--output-directory <directory>', 'Write test results to files, format is defined by --output-format')
+  .option('--output-format <@mochajs/json-file-reporter|xunit>', 'Format for the output file. (default: @mochajs/json-file-reporter)')
 
 commander.parse(process.argv);
 const options = commander.opts();
 
 options.maxWorkers = options.maxWorkers ? options.maxWorkers : 1
 options.configFile = options.configFile ? options.configFile : '.side.yml'
-options.filter = options.filter ? options.filter : '*.side'
+options.filter = options.filter ? options.filter : ''
+options.outputFormat = options.outputFormat ? options.outputFormat : '@mochajs/json-file-reporter'
 options.buildFolderPath = '_generated'
 
 var conf = {level: options.debug ? logger.DEBUG :logger.INFO};
 var log = logger(conf);
 
+const sideFiles = [
+  ...commander.args.reduce((projects, project) => {
+    glob.sync(project).forEach(p => {
+      projects.add(p)
+    })
+    return projects
+  }, new Set()),
+];
+
 var mocha = new Mocha(
 {
+    reporter: "mocha-multi-reporters",
+    grep: options.filter,
     parallel: true,
-    jobs: options.maxWorkers
+    jobs: options.maxWorkers,
+    reporterOptions: {
+          "reporterEnabled": "spec" + (options.outputDirectory ? ', ' + options.outputFormat :''),
+          "mochajsJsonFileReporterReporterOptions": {
+            "output": path.join(options.outputDirectory, "test-output.json")
+          },
+          "xunitReporterOptions": {
+            "output": path.join(options.outputDirectory, "test-output.xunit.xml")
+          },
+      }
 });
+
 
 rimraf.sync(options.buildFolderPath)
 fs.mkdirSync(options.buildFolderPath);
@@ -48,7 +72,8 @@ try {
 } catch (e) {
   log.error(e);
 }
-const projects = glob.sync(options.filter).map(name => JSON.parse(fs.readFileSync(name)))
+
+const projects = sideFiles.map(name => JSON.parse(fs.readFileSync(name)))
 var testFileInc = 1;
 var promises = [];
 projects.forEach(project => {
