@@ -10,6 +10,9 @@ import logger from 'cli-logger';
 import yaml  from 'js-yaml';
 import Mocha from 'mocha';
 import glob from 'glob';
+import createClone from 'rfdc';
+
+const clone = createClone();
 
 const { project: projectProcessor } = pkg;
 import { exec } from "child_process";
@@ -79,14 +82,15 @@ var promises = [];
 projects.forEach(project => {
   project.tests.forEach(test => {
     promises.push(new Promise(async (resolve, reject) => {
-    config.capabilities['name'] = test.name
+    var _config = clone(config);
+    _config.capabilities['name'] = test.name
     const result = await emitTest({
       baseUrl: options.baseUrl ? options.baseUrl : project.url,
       test: test,
       tests: project.tests,
       beforeEachOptions: {
-        capabilities: config.capabilities,
-        gridUrl: config.server,
+        capabilities: _config.capabilities,
+        gridUrl: _config.server,
       },});
     var filename = path.join(options.buildFolderPath, testFileInc + result.filename);
     testFileInc ++;
