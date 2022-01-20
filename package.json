@@ -1,7 +1,7 @@
 {
   "name": "@maxmattone/browserstack-side-runner",
   "repository": "git@github.com:mattonem/browserstack-side-runner.git",
-  "version": "1.2.4",
+  "version": "1.2.5-beta.0",
   "main": "index.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
