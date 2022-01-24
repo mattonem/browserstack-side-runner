@@ -11,6 +11,10 @@ import yaml  from 'js-yaml';
 import Mocha from 'mocha';
 import glob from 'glob';
 import createClone from 'rfdc';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const clone = createClone();
 
@@ -84,7 +88,7 @@ projects.forEach(project => {
     promises.push(new Promise(async (resolve, reject) => {
     var _config = clone(config);
     _config.capabilities['name'] = test.name
-    var packageJson = require('./package.json');
+    var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
     _config.capabilities['browserstack-side-runner-version'] = packageJson.version
     const result = await emitTest({
       baseUrl: options.baseUrl ? options.baseUrl : project.url,
