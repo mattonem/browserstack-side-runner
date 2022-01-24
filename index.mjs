@@ -84,6 +84,8 @@ projects.forEach(project => {
     promises.push(new Promise(async (resolve, reject) => {
     var _config = clone(config);
     _config.capabilities['name'] = test.name
+    var packageJson = require('./package.json');
+    _config.capabilities['browserstack-side-runner-version'] = packageJson.version
     const result = await emitTest({
       baseUrl: options.baseUrl ? options.baseUrl : project.url,
       test: test,
