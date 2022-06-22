@@ -28,6 +28,7 @@ commander
   .option('-w, --max-workers <number>', 'Maximum amount of workers that will run your tests, defaults to 1')
   .option('--base-url <url>', 'Override the base URL that was set in the IDE')
   .option('--config, --config-file <filepath>', 'Use specified YAML file for configuration. (default: .side.yml)')
+  .option('--test-timeout <ms>', 'Timeout value for each tests. (default: 30000)')
   .option('--output-directory <directory>', 'Write test results to files, format is defined by --output-format')
   .option('--output-format <@mochajs/json-file-reporter|xunit>', 'Format for the output file. (default: @mochajs/json-file-reporter)')
 
@@ -35,6 +36,7 @@ commander.parse(process.argv);
 const options = commander.opts();
 
 options.maxWorkers = options.maxWorkers ? options.maxWorkers : 1
+options.testTimeout = options.testTimeout ? options.testTimeout : 30000
 options.configFile = options.configFile ? options.configFile : '.side.yml'
 options.filter = options.filter ? options.filter : ''
 options.outputFormat = options.outputFormat ? options.outputFormat : '@mochajs/json-file-reporter'
@@ -58,6 +60,7 @@ var mocha = new Mocha(
     grep: options.filter,
     parallel: true,
     jobs: options.maxWorkers,
+    timeout: options.testTimeout,
     reporterOptions: {
           "reporterEnabled": "spec" + (options.outputDirectory ? ', ' + options.outputFormat :''),
           "mochajsJsonFileReporterReporterOptions": {
