@@ -11,6 +11,10 @@ import yaml  from 'js-yaml';
 import Mocha from 'mocha';
 import glob from 'glob';
 import createClone from 'rfdc';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const clone = createClone();
 
@@ -24,6 +28,7 @@ commander
   .option('-w, --max-workers <number>', 'Maximum amount of workers that will run your tests, defaults to 1')
   .option('--base-url <url>', 'Override the base URL that was set in the IDE')
   .option('--config, --config-file <filepath>', 'Use specified YAML file for configuration. (default: .side.yml)')
+  .option('--test-timeout <ms>', 'Timeout value for each tests. (default: 30000)')
   .option('--output-directory <directory>', 'Write test results to files, format is defined by --output-format')
   .option('--output-format <@mochajs/json-file-reporter|xunit>', 'Format for the output file. (default: @mochajs/json-file-reporter)')
 
@@ -31,6 +36,7 @@ commander.parse(process.argv);
 const options = commander.opts();
 
 options.maxWorkers = options.maxWorkers ? options.maxWorkers : 1
+options.testTimeout = options.testTimeout ? options.testTimeout : 30000
 options.configFile = options.configFile ? options.configFile : '.side.yml'
 options.filter = options.filter ? options.filter : ''
 options.outputFormat = options.outputFormat ? options.outputFormat : '@mochajs/json-file-reporter'
@@ -54,6 +60,7 @@ var mocha = new Mocha(
     grep: options.filter,
     parallel: true,
     jobs: options.maxWorkers,
+    timeout: options.testTimeout,
     reporterOptions: {
           "reporterEnabled": "spec" + (options.outputDirectory ? ', ' + options.outputFormat :''),
           "mochajsJsonFileReporterReporterOptions": {
@@ -84,6 +91,8 @@ projects.forEach(project => {
     promises.push(new Promise(async (resolve, reject) => {
     var _config = clone(config);
     _config.capabilities['name'] = test.name
+    var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
+    _config.capabilities['browserstack-side-runner-version'] = packageJson.version
     const result = await emitTest({
       baseUrl: options.baseUrl ? options.baseUrl : project.url,
       test: test,
