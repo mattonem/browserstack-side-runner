@@ -91,6 +91,11 @@ projects.forEach(project => {
     promises.push(new Promise(async (resolve, reject) => {
     var _config = clone(config);
     _config.capabilities['name'] = test.name
+    if(_config.capabilities['bstack:options'] == undefined)
+    {
+      _config.capabilities['bstack:options'] = []
+    }
+    _config.capabilities['bstack:options']['sessionName'] = test.name
     var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
     _config.capabilities['browserstack-side-runner-version'] = packageJson.version
     const result = await emitTest({
