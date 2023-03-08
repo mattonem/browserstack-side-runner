@@ -9,16 +9,18 @@ npx @maxmattone/browserstack-side-runner -w 2 test.side
 Don't forget to use the config file `.side.yml` like so:
 ```yml
 # this is how your .side.yml should look like
- capabilities:
-     browserName: "Chrome"
-     browser_version: '81.0'
-     os: "Windows"
-     os_version: '10'
-     resolution: '1024x768'
-     build: 'Selenium IDE automate test'
-     browserstack.debug: true
-     browserstack.console: "verbose"
-     browserstack.networkLogs: true
- server: "https://<bs_username>:<bs_accesskey>@hub-cloud.browserstack.com/wd/hub"
+capabilities:
+    browserName: "Chrome"
+    'bstack:options': 
+      browserVersion: 'latest'
+      os: "Windows"
+      osVersion: '10'
+      resolution: "3840x2160",
+      projectName: 'My Selenium IDE Project'
+      buildName: "My Seleenium IDE Test Suite"
+      debug: true
+      networkLogs: true
+      consoleLogs: "verbose"
+server: "https://<bs_username>:<bs_accesskey>@hub-cloud.browserstack.com/wd/hub"
 ```
 
