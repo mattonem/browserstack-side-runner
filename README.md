@@ -6,21 +6,31 @@ This project is variant of the [selenium-side-runner](https://github.com/Seleniu
 npm install @maxmattone/browserstack-side-runner
 npx @maxmattone/browserstack-side-runner -w 2 test.side
 ```
-Don't forget to use the config file `.side.yml` like so:
+Don't forget to use the config file `browserstack.yml` like so:
 ```yml
-# this is how your .side.yml should look like
-capabilities:
-    browserName: "Chrome"
-    'bstack:options': 
-      browserVersion: 'latest'
-      os: "Windows"
-      osVersion: '10'
-      resolution: "3840x2160",
-      projectName: 'My Selenium IDE Project'
-      buildName: "My Seleenium IDE Test Suite"
-      debug: true
-      networkLogs: true
-      consoleLogs: "verbose"
-server: "https://<bs_username>:<bs_accesskey>@hub-cloud.browserstack.com/wd/hub"
+# this is how your browserstack.yml should look like
+userName: username
+accessKey: access_key
+platforms:
+  - os: Windows
+    osVersion: 11
+    browserName: Chrome
+    browserVersion: 103.0
+  - os: Windows
+    osVersion: 10
+    browserName: Firefox
+    browserVersion: 102.0
+  - os: OS X
+    osVersion: Big Sur
+    browserName: Safari
+    browserVersion: 14.1
+parallelsPerPlatform: 1
+browserstackLocal: true
+buildName: bstack-demo
+projectName: BrowserStack Sample
+debug: true
+networkLogs: true
+consoleLogs: info
 ```
 
+You can use [this online tool](https://www.browserstack.com/docs/automate/selenium/sdk-config-generator) to generate your config file based on your needs. 
