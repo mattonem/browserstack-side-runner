@@ -4,7 +4,7 @@
     "type": "git",
     "url": "git+https://github.com/mattonem/browserstack-side-runner.git"
   },
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "main": "index.mjs",
   "homepage": "https://github.com/mattonem/browserstack-side-runner#readme",
   "scripts": {
@@ -22,6 +22,8 @@
     "browserstack-node-sdk": "^1.6.2",
     "cli-logger": "^0.5.40",
     "commander": "^8.0.0",
+    "cross-spawn": "^7.0.3",
+    "dotenv": "^16.0.3",
     "glob": "^7.1.7",
     "js-yaml": "^4.1.0",
     "mocha": "^8.4.0",

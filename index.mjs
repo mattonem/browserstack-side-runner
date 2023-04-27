@@ -3,12 +3,15 @@
 import fs from 'fs'
 import rimraf from "rimraf";
 import path from 'path'
-import { emitTest, emitSuite } from '@maxmattone/code-export-browserstack-mocha'
+import { emitTest } from '@maxmattone/code-export-browserstack-mocha'
 import pkg from '@seleniumhq/side-utils';
 import commander from 'commander';
 import logger from 'cli-logger';
 import glob from 'glob';
-import * as child_process from 'child_process'; 
+import spawn from 'cross-spawn';
+import * as dotenv from 'dotenv'; 
+import { exit } from 'process';
+dotenv.config();
 
 const { project: projectProcessor } = pkg;
 
@@ -87,17 +90,10 @@ for(const sideFileName of sideFiles)
 
 }
 
-const ls = child_process.spawn('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeout', options.testTimeout,'-j', options.maxWorkers, '-g', options.filter]);
+const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeout', options.testTimeout,'-j', options.maxWorkers, '-g', options.filter], { stdio: 'inherit' });
 
-ls.stdout.on('data', (data) => {
-  console.log(`${data}`);
-});
-
-ls.stderr.on('data', (data) => {
-  console.error(`${data}`);
-});
-
-ls.on(
-  'close', (code) => {
-  process.exit(code)
-});
+if(!options.debug)
+{
+  rimraf.sync(options.buildFolderPath)
+}
+exit(testSuiteProcess.status)
