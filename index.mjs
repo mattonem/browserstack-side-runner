@@ -12,7 +12,6 @@ import glob from 'glob';
 import spawn from 'cross-spawn';
 import * as dotenv from 'dotenv'; 
 import { exit } from 'process';
-console.log(codeExport)
 dotenv.config();
 commander
   .usage('[options] project.side [project.side] [*.side]')
