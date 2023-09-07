@@ -3,7 +3,8 @@
 import fs from 'fs'
 import rimraf from "rimraf";
 import path from 'path'
-import { emitTest } from '@maxmattone/code-export-browserstack-mocha'
+import codeExport from './browserstack-mocha-export.mjs'
+import { project as projectProcessor } from '@seleniumhq/side-code-export'
 import pkg from '@seleniumhq/side-utils';
 import commander from 'commander';
 import logger from 'cli-logger';
@@ -11,10 +12,8 @@ import glob from 'glob';
 import spawn from 'cross-spawn';
 import * as dotenv from 'dotenv'; 
 import { exit } from 'process';
+console.log(codeExport)
 dotenv.config();
-
-const { project: projectProcessor } = pkg;
-
 commander
   .usage('[options] project.side [project.side] [*.side]')
   .option('-d, --debug', 'output extra debugging')
@@ -76,10 +75,11 @@ for(const sideFileName of sideFiles)
     for(const aTestCase of aSuite.tests)
     {
       const test = project.tests.find(test => test.name === aTestCase);
-      var results = await emitTest({
+      var results = await codeExport.default.emit.test({
         baseUrl: project.url,
         test: test,
         tests: project.tests,
+        project: project
       })
       fs.writeFileSync( path.join(
         options.buildFolderPath,
