@@ -4,7 +4,7 @@
     "type": "git",
     "url": "git+https://github.com/mattonem/browserstack-side-runner.git"
   },
-  "version": "2.0.0-beta.4",
+  "version": "2.0.0-beta.5",
   "main": "index.mjs",
   "homepage": "https://github.com/mattonem/browserstack-side-runner#readme",
   "scripts": {
@@ -20,6 +20,7 @@
     "@mochajs/json-file-reporter": "^1.3.0",
     "@seleniumhq/code-export-javascript-mocha": "^4.0.0-alpha.3",
     "@seleniumhq/side-code-export": "^4.0.0-alpha.3",
+    "@seleniumhq/side-utils": "^3.17.2",
     "browserstack-node-sdk": "^1.25.2",
     "cli-logger": "^0.5.40",
     "commander": "^8.0.0",
