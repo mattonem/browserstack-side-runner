@@ -22,14 +22,15 @@ commander
   .option('--test-timeout <ms>', 'Timeout value for each tests. (default: 30000)')
   .option('--output-directory <directory>', 'Write test results to files, format is defined by --output-format')
   .option('--output-format <@mochajs/json-file-reporter|xunit>', 'Format for the output file. (default: @mochajs/json-file-reporter)')
+  .option('--browserstack.config <path>','path to browserstack config file, default to browserstack.yml')
 
 commander.parse(process.argv);
 const options = commander.opts();
-
 options.maxWorkers = options.maxWorkers ? options.maxWorkers : 1
 options.testTimeout = options.testTimeout ? options.testTimeout : 30000
 options.filter = options.filter ? options.filter : ''
 options.outputFormat = options.outputFormat ? options.outputFormat : '@mochajs/json-file-reporter'
+options.browserstackConfig = options['browserstack.config'] ? options['browserstack.config'] : 'browserstack.yml'
 options.buildFolderPath = '_generated'
 
 var conf = {level: options.debug ? logger.DEBUG :logger.INFO};
@@ -88,8 +89,7 @@ for(const sideFileName of sideFiles)
   }
 
 }
-
-const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeout', options.testTimeout,'-j', options.maxWorkers, '-g', options.filter], { stdio: 'inherit' });
+const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeout', options.testTimeout,'-j', options.maxWorkers, '-g', options.filter, '--browserstack.config', options.browserstackConfig], { stdio: 'inherit' });
 
 if(!options.debug)
 {
