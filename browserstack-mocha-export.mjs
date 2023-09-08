@@ -41,4 +41,10 @@ function beforeEach() {
 
 codeExport.opts.hooks.beforeEach = new exporter.hook(beforeEach())
 
+function generateTestDeclaration(name) {
+    return `it('test', async function() {`
+}
+
+codeExport.opts.generateTestDeclaration = generateTestDeclaration
+
 export default codeExport
