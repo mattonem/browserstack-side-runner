@@ -17,19 +17,14 @@ commander
   .usage('[options] project.side [project.side] [*.side]')
   .option('-d, --debug', 'output extra debugging')
   .option('-f, --filter <grep regex>', 'Run tests matching name')
-  .option('-w, --max-workers <number>', 'Maximum amount of workers that will run your tests, defaults to 1')
   .option('--base-url <url>', 'Override the base URL that was set in the IDE')
   .option('--test-timeout <ms>', 'Timeout value for each tests. (default: 30000)')
-  .option('--output-directory <directory>', 'Write test results to files, format is defined by --output-format')
-  .option('--output-format <@mochajs/json-file-reporter|xunit>', 'Format for the output file. (default: @mochajs/json-file-reporter)')
   .option('--browserstack.config <path>','path to browserstack config file, default to browserstack.yml')
 
 commander.parse(process.argv);
 const options = commander.opts();
-options.maxWorkers = options.maxWorkers ? options.maxWorkers : 1
 options.testTimeout = options.testTimeout ? options.testTimeout : 30000
 options.filter = options.filter ? options.filter : ''
-options.outputFormat = options.outputFormat ? options.outputFormat : '@mochajs/json-file-reporter'
 options.browserstackConfig = options['browserstack.config'] ? options['browserstack.config'] : 'browserstack.yml'
 options.buildFolderPath = '_generated'
 
@@ -89,7 +84,7 @@ for(const sideFileName of sideFiles)
   }
 
 }
-const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeout', options.testTimeout,'-j', options.maxWorkers, '-g', options.filter, '--browserstack.config', options.browserstackConfig], { stdio: 'inherit' });
+const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeout', options.testTimeout, '-g', options.filter, '--browserstack.config', options.browserstackConfig], { stdio: 'inherit' });
 
 if(!options.debug)
 {

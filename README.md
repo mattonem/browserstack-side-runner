@@ -4,7 +4,7 @@ This project is variant of the [selenium-side-runner](https://github.com/Seleniu
 
 ```sh
 npm install @maxmattone/browserstack-side-runner
-npx @maxmattone/browserstack-side-runner -w 2 test.side
+npx @maxmattone/browserstack-side-runner test.side
 ```
 Don't forget to use the config file `browserstack.yml` like so:
 ```yml
@@ -24,7 +24,7 @@ platforms:
     osVersion: Big Sur
     browserName: Safari
     browserVersion: 14.1
-parallelsPerPlatform: 1
+parallelsPerPlatform: 3
 browserstackLocal: true
 buildName: bstack-demo
 projectName: BrowserStack Sample
