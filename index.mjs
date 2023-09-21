@@ -27,7 +27,6 @@ options.testTimeout = options.testTimeout ? options.testTimeout : 30000
 options.filter = options.filter ? options.filter : ''
 options.browserstackConfig = options['browserstack.config'] ? options['browserstack.config'] : 'browserstack.yml'
 options.buildFolderPath = '_generated'
-
 var conf = {level: options.debug ? logger.DEBUG :logger.INFO};
 var log = logger(conf);
 
@@ -59,6 +58,7 @@ function normalizeProject(project) {
   _project.suites.forEach(suite => {
     projectProcessor.normalizeTestsInSuite({ suite, tests: _project.tests })
   })
+  _project.url = options.baseUrl ? options.baseUrl : project.url
   return _project
 }
 
@@ -71,7 +71,7 @@ for(const sideFileName of sideFiles)
     {
       const test = project.tests.find(test => test.name === aTestCase);
       var results = await codeExport.default.emit.test({
-        baseUrl: project.url,
+        baseUrl: options.baseUrl ? options.baseUrl : project.url,
         test: test,
         tests: project.tests,
         project: project
