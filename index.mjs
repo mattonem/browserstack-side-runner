@@ -20,6 +20,8 @@ commander
   .option('--base-url <url>', 'Override the base URL that was set in the IDE')
   .option('--test-timeout <ms>', 'Timeout value for each tests. (default: 30000)')
   .option('--browserstack.config <path>','path to browserstack config file, default to browserstack.yml')
+  .option('--output-format <json|xunit>', 'Format for the output file.')
+  .option('--output-file <path>','path for the report file. required if --output-format provided')
 
 commander.parse(process.argv);
 const options = commander.opts();
@@ -84,7 +86,12 @@ for(const sideFileName of sideFiles)
   }
 
 }
-const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeout', options.testTimeout, '-g', options.filter, '--browserstack.config', options.browserstackConfig], { stdio: 'inherit' });
+
+var reporter = []
+if(options.outputFormat && options.outputFile)
+  reporter = [ '--reporter', options.outputFormat, '--reporter-options', 'output=' + options.outputFile]
+
+const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeout', options.testTimeout, '-g', options.filter, '--browserstack.config', options.browserstackConfig, ...reporter], { stdio: 'inherit' });
 
 if(!options.debug)
 {
