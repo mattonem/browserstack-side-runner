@@ -91,7 +91,7 @@ var reporter = []
 if(options.outputFormat && options.outputFile)
   reporter = [ '--reporter', options.outputFormat, '--reporter-options', 'output=' + options.outputFile]
 
-const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeout', options.testTimeout, '-g', options.filter, '--browserstack.config', options.browserstackConfig, ...reporter], { stdio: 'inherit' });
+const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeouts', options.testTimeout, '-g', options.filter, '--browserstack.config', options.browserstackConfig, ...reporter], { stdio: 'inherit', env: { ...process.env, testTimeout: options.testTimeout } });
 
 if(!options.debug)
 {

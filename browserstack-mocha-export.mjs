@@ -46,6 +46,10 @@ function declareVariables() {
         startingSyntax: {
           commands: [
             {
+                level: 0,
+                statement: `this.timeout(process.env.testTimeout)`,
+            },
+            {
               level: 0,
               statement: `let driver`,
             },
@@ -66,5 +70,4 @@ function generateTestDeclaration(name) {
 }
 
 codeExport.opts.generateTestDeclaration = generateTestDeclaration
-
 export default codeExport
