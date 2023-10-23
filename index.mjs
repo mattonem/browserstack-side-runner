@@ -18,7 +18,7 @@ commander
   .option('-d, --debug', 'output extra debugging')
   .option('-f, --filter <grep regex>', 'Run tests matching name')
   .option('--base-url <url>', 'Override the base URL that was set in the IDE')
-  .option('--test-timeout <ms>', 'Timeout value for each tests. (default: 30000)')
+  .option('--test-timeout <ms>', 'Timeout value for each tests; when running test on Browserstack, 90s will be added to this value. (default: 30000)')
   .option('--browserstack.config <path>','path to browserstack config file, default to browserstack.yml')
   .option('--output-format <json|xunit>', 'Format for the output file.')
   .option('--output-file <path>','path for the report file. required if --output-format provided')
