@@ -41,10 +41,33 @@ function beforeEach() {
 
 codeExport.opts.hooks.beforeEach = new exporter.hook(beforeEach())
 
+function declareVariables() {
+    const params = {
+        startingSyntax: {
+          commands: [
+            {
+                level: 0,
+                statement: `this.timeout(process.env.testTimeout)`,
+            },
+            {
+              level: 0,
+              statement: `let driver`,
+            },
+            {
+              level: 0,
+              statement: 'let vars',
+            },
+          ],
+        },
+      }
+      return params
+}
+
+codeExport.opts.hooks.declareVariables = new exporter.hook(declareVariables())
+
 function generateTestDeclaration(name) {
     return `it('test', async function() {`
 }
 
 codeExport.opts.generateTestDeclaration = generateTestDeclaration
-
 export default codeExport
