@@ -3,45 +3,32 @@
 import fs from 'fs'
 import rimraf from "rimraf";
 import path from 'path'
-import { emitTest, emitSuite } from '@maxmattone/code-export-browserstack-mocha'
+import codeExport from './browserstack-mocha-export.mjs'
+import { project as projectProcessor } from '@seleniumhq/side-code-export'
 import pkg from '@seleniumhq/side-utils';
 import commander from 'commander';
 import logger from 'cli-logger';
-import yaml  from 'js-yaml';
-import Mocha from 'mocha';
 import glob from 'glob';
-import createClone from 'rfdc';
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-
-const clone = createClone();
-
-const { project: projectProcessor } = pkg;
-import { exec } from "child_process";
-
+import spawn from 'cross-spawn';
+import * as dotenv from 'dotenv'; 
+import { exit } from 'process';
+dotenv.config();
 commander
   .usage('[options] project.side [project.side] [*.side]')
   .option('-d, --debug', 'output extra debugging')
   .option('-f, --filter <grep regex>', 'Run tests matching name')
-  .option('-w, --max-workers <number>', 'Maximum amount of workers that will run your tests, defaults to 1')
   .option('--base-url <url>', 'Override the base URL that was set in the IDE')
-  .option('--config, --config-file <filepath>', 'Use specified YAML file for configuration. (default: .side.yml)')
-  .option('--test-timeout <ms>', 'Timeout value for each tests. (default: 30000)')
-  .option('--output-directory <directory>', 'Write test results to files, format is defined by --output-format')
-  .option('--output-format <@mochajs/json-file-reporter|xunit>', 'Format for the output file. (default: @mochajs/json-file-reporter)')
+  .option('--test-timeout <ms>', 'Timeout value for each tests (default: 30000)')
+  .option('--browserstack.config <path>','path to browserstack config file, default to browserstack.yml')
+  .option('--output-format <json|xunit>', 'Format for the output file.')
+  .option('--output-file <path>','path for the report file. required if --output-format provided')
 
 commander.parse(process.argv);
 const options = commander.opts();
-
-options.maxWorkers = options.maxWorkers ? options.maxWorkers : 1
 options.testTimeout = options.testTimeout ? options.testTimeout : 30000
-options.configFile = options.configFile ? options.configFile : '.side.yml'
 options.filter = options.filter ? options.filter : ''
-options.outputFormat = options.outputFormat ? options.outputFormat : '@mochajs/json-file-reporter'
+options.browserstackConfig = options['browserstack.config'] ? options['browserstack.config'] : 'browserstack.yml'
 options.buildFolderPath = '_generated'
-
 var conf = {level: options.debug ? logger.DEBUG :logger.INFO};
 var log = logger(conf);
 
@@ -54,69 +41,60 @@ const sideFiles = [
   }, new Set()),
 ];
 
-var mocha = new Mocha(
-{
-    reporter: "mocha-multi-reporters",
-    grep: options.filter,
-    parallel: true,
-    jobs: options.maxWorkers,
-    timeout: options.testTimeout,
-    reporterOptions: {
-          "reporterEnabled": "spec" + (options.outputDirectory ? ', ' + options.outputFormat :''),
-          "mochajsJsonFileReporterReporterOptions": {
-            "output": path.join(options.outputDirectory || '', "test-output.json")
-          },
-          "xunitReporterOptions": {
-            "output": path.join(options.outputDirectory || '', "test-output.xunit.xml")
-          },
-      }
-});
-
-
 rimraf.sync(options.buildFolderPath)
 fs.mkdirSync(options.buildFolderPath);
 
-var config
-try {
-  config = yaml.load(fs.readFileSync(options.configFile));
-} catch (e) {
-  log.error(e);
+function readFile(filename) {
+  return JSON.parse(
+    fs.readFileSync(
+      path.join(
+        '.',
+        filename
+      )
+    )
+  )
 }
 
-const projects = sideFiles.map(name => JSON.parse(fs.readFileSync(name)))
-var testFileInc = 1;
-var promises = [];
-projects.forEach(project => {
-  project.tests.forEach(test => {
-    promises.push(new Promise(async (resolve, reject) => {
-    var _config = clone(config);
-    _config.capabilities['name'] = test.name
-    if(_config.capabilities['bstack:options'] == undefined)
-    {
-      _config.capabilities['bstack:options'] = []
-    }
-    _config.capabilities['bstack:options']['sessionName'] = test.name
-    var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
-    _config.capabilities['browserstack-side-runner-version'] = packageJson.version
-    const result = await emitTest({
-      baseUrl: options.baseUrl ? options.baseUrl : project.url,
-      test: test,
-      tests: project.tests,
-      beforeEachOptions: {
-        capabilities: _config.capabilities,
-        gridUrl: _config.server,
-      },});
-    var filename = path.join(options.buildFolderPath, testFileInc + result.filename);
-    testFileInc ++;
-    fs.writeFileSync(filename, result.body);
-    mocha.addFile(filename);
-    resolve()}))
+function normalizeProject(project) {
+  let _project = { ...project }
+  _project.suites.forEach(suite => {
+    projectProcessor.normalizeTestsInSuite({ suite, tests: _project.tests })
   })
-});
-Promise.all(promises).then(()=>{
-  mocha.run(function(failures) {
-    process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
-    if(!options.debug) rimraf.sync(options.buildFolderPath)
-  });
+  _project.url = options.baseUrl ? options.baseUrl : project.url
+  return _project
+}
 
-})
+for(const sideFileName of sideFiles)
+{
+  const project = normalizeProject(readFile(sideFileName))
+  for(const aSuite of project.suites)
+  {
+    for(const aTestCase of aSuite.tests)
+    {
+      const test = project.tests.find(test => test.name === aTestCase);
+      var results = await codeExport.default.emit.test({
+        baseUrl: options.baseUrl ? options.baseUrl : project.url,
+        test: test,
+        tests: project.tests,
+        project: project
+      })
+      fs.writeFileSync( path.join(
+        options.buildFolderPath,
+        results.filename
+      ), results.body);
+    }
+  }
+
+}
+
+var reporter = []
+if(options.outputFormat && options.outputFile)
+  reporter = [ '--reporter', options.outputFormat, '--reporter-options', 'output=' + options.outputFile]
+
+const testSuiteProcess = spawn.sync('npx', ['browserstack-node-sdk', 'mocha', '_generated', '--timeouts', options.testTimeout, '-g', options.filter, '--browserstack.config', options.browserstackConfig, ...reporter], { stdio: 'inherit', env: { ...process.env, testTimeout: options.testTimeout } });
+
+if(!options.debug)
+{
+  rimraf.sync(options.buildFolderPath)
+}
+exit(testSuiteProcess.status)
