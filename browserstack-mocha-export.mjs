@@ -25,10 +25,6 @@ function beforeEach() {
             .usingServer('${gridUrl}')
             .build()`,
                 },
-                {
-                    level: 1, statement: `if(process.env.BS_A11Y_TEST_RUN_ID)
-            {await driver.sleep(3000);}`
-                },
                 { level: 1, statement: 'vars = {}' },
             ],
         }),
