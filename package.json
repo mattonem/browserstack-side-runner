@@ -4,7 +4,7 @@
     "type": "git",
     "url": "git+https://github.com/mattonem/browserstack-side-runner.git"
   },
-  "version": "2.1.0",
+  "version": "2.2.0-beta.1",
   "main": "index.mjs",
   "homepage": "https://github.com/mattonem/browserstack-side-runner#readme",
   "scripts": {
