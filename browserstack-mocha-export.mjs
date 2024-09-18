@@ -66,8 +66,14 @@ function declareVariables() {
 codeExport.opts.hooks.declareVariables = new exporter.hook(declareVariables())
 
 function generateTestDeclaration(name) {
-    return `it('test', async function() {`
+    return `it('${name}', async function() {`
 }
 
 codeExport.opts.generateTestDeclaration = generateTestDeclaration
+
+function generateSuiteDeclaration(name) {
+    return `describe('TestCase', function() {`
+}
+
+codeExport.opts.generateSuiteDeclaration = generateSuiteDeclaration
 export default codeExport
